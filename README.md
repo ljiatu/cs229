@@ -15,5 +15,5 @@ conda activate cs229_project
 To install all necessary dependencies:
 
 ```
-pip install -r requirements.txt
+pip install -e .
 ```
