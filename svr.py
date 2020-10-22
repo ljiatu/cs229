@@ -8,7 +8,7 @@ from sklearn.svm import SVR
 
 from utils import load_data
 
-KERNEL_TYPES = ["linear", "poly", "sigmoid"]
+KERNEL_TYPES = ["poly", "sigmoid"]
 REGULARIZATION_STRENGTHS = [0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
 MODEL_SAVE_PATH_FORMAT = "svr_model_k_{}_c_{}.joblib"
 BEST_MODEL_SAVE_PATH = "svr_model_best.joblib"
@@ -30,7 +30,7 @@ def train(
     y = train_score_df.to_numpy()[:, 1:].ravel()
 
     clf = SVR(kernel=kernel_type, C=reg_strength)
-    # clf.fit(X, y)
+    clf.fit(X, y)
     # Split the training data into 5 folds and perform cross validation.
     val_scores = cross_val_score(clf, X, y, cv=5)
     val_score = val_scores.mean()
