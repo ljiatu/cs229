@@ -8,7 +8,7 @@ from sklearn.svm import SVR
 
 from utils import load_data
 
-KERNEL_TYPES = ["linear", "poly", "rbf", "sigmoid"]
+KERNEL_TYPES = ["linear", "poly", "sigmoid"]
 REGULARIZATION_STRENGTHS = [0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
 MODEL_SAVE_PATH_FORMAT = "svr_model_k_{}_c_{}.joblib"
 BEST_MODEL_SAVE_PATH = "svr_model_best.joblib"
@@ -63,8 +63,11 @@ def main() -> None:
     train_feature_df, train_score_df = load_data("X_ordered_by_importance_train.csv", "y_train.csv")
     test_feature_df, test_score_df = load_data("X_ordered_by_importance_test.csv", "y_test.csv")
 
-    pool = multiprocessing.Pool(processes=7)
-    train_args = [(train_feature_df, train_score_df, k, c) for k in KERNEL_TYPES for c in REGULARIZATION_STRENGTHS]
+    pool = multiprocessing.Pool(processes=6)
+    train_args = [
+        (train_feature_df.deepcopy(), train_score_df.deepcopy(), k, c)
+        for k in KERNEL_TYPES for c in REGULARIZATION_STRENGTHS
+    ]
     rets = pool.starmap(train, train_args)
 
     best_clf = None
