@@ -10,6 +10,6 @@ def load_data(feature_file_path: str, score_file_path: str) -> Tuple[pd.DataFram
     The first column of both the feature_df and score_df contains labels for the target sequences.
     """
     feature_df = pd.read_csv(feature_file_path)
-    score_df = pd.read_csv(score_file_path, header=None)
+    score_df = pd.read_csv(score_file_path)
 
     return feature_df, score_df
