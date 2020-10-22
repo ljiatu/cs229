@@ -1,4 +1,5 @@
-from typing import Sequence
+import multiprocessing
+from typing import Tuple
 
 import pandas as pd
 from joblib import dump
@@ -16,38 +17,30 @@ BEST_MODEL_SAVE_PATH = "svr_model_best.joblib"
 def train(
         train_feature_df: pd.DataFrame,
         train_score_df: pd.DataFrame,
-        kernel_types: Sequence[str],
-        reg_strengths: Sequence[float],
-        best_model_save_path: str,
-) -> SVR:
+        kernel_type: str,
+        reg_strength: float,
+) -> Tuple[float, SVR]:
     """
     Train the model with the given inputs and returns the trained model.
     """
-    assert len(reg_strengths) > 0
+    print(f"Training SVR model with kernel type {kernel_type} and regularization strength {reg_strength}")
     # Drop the first column, which contains labels for target sequences.
     X = train_feature_df.to_numpy()[:, 1:]
     # y initially comes out as a column vector. Use ravel() to make it a row vector instead.
     y = train_score_df.to_numpy()[:, 1:].ravel()
 
-    best_clf = None
-    best_val_score = float("-inf")
-    for k in kernel_types:
-        for c in reg_strengths:
-            clf = SVR(kernel=k, C=c)
-            clf.fit(X, y)
-            # Split the training data into 5 folds and perform cross validation.
-            val_scores = cross_val_score(clf, X, y, cv=5)
-            val_score = val_scores.mean()
-            print(f"Kernel type: {k}. Reg strength {c}. Mean val score: {val_score:0.2f} (+/- {val_scores.std() * 2:0.2f})")
-            # Save the individual models.
-            dump(clf, MODEL_SAVE_PATH_FORMAT.format(k, c))
-            if val_score > best_val_score:
-                best_clf = clf
-                best_val_score = val_score
-
-    # Save the best model to a file.
-    dump(best_clf, best_model_save_path)
-    return best_clf
+    clf = SVR(kernel=kernel_type, C=reg_strength)
+    # clf.fit(X, y)
+    # Split the training data into 5 folds and perform cross validation.
+    val_scores = cross_val_score(clf, X, y, cv=5)
+    val_score = val_scores.mean()
+    print(
+        f"Kernel type: {kernel_type}. Reg strength {reg_strength}. "
+        f"Mean val score: {val_score:0.2f} (+/- {val_scores.std() * 2:0.2f})"
+    )
+    # Save the individual models.
+    dump(clf, MODEL_SAVE_PATH_FORMAT.format(kernel_type, reg_strength))
+    return val_score, clf
 
 
 def test(test_feature_df: pd.DataFrame, test_score_df: pd.DataFrame, clf: SVR, test_output_save_path: str) -> None:
@@ -69,9 +62,21 @@ def test(test_feature_df: pd.DataFrame, test_score_df: pd.DataFrame, clf: SVR, t
 def main() -> None:
     train_feature_df, train_score_df = load_data("X_ordered_by_importance_train.csv", "y_train.csv")
     test_feature_df, test_score_df = load_data("X_ordered_by_importance_test.csv", "y_test.csv")
-    clf = train(train_feature_df, train_score_df, KERNEL_TYPES, REGULARIZATION_STRENGTHS, BEST_MODEL_SAVE_PATH)
+
+    pool = multiprocessing.Pool(processes=7)
+    train_args = [(train_feature_df, train_score_df, k, c) for k in KERNEL_TYPES for c in REGULARIZATION_STRENGTHS]
+    rets = pool.starmap(train, train_args)
+
+    best_clf = None
+    best_val_score = float("-inf")
+    for val_score, clf in rets:
+        if val_score > best_val_score:
+            best_val_score = val_score
+            best_clf = clf
+
+    dump(best_clf, BEST_MODEL_SAVE_PATH)
     # clf = load("svr_model_best.joblib")
-    test(test_feature_df, test_score_df, clf, "svr_preds.csv")
+    test(test_feature_df, test_score_df, best_clf, "svr_preds.csv")
 
 
 if __name__ == "__main__":
