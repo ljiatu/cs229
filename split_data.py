@@ -18,10 +18,10 @@ def split(feature_file_path: str, score_file_path: str) -> None:
 
     feature_file_name = feature_file_path.split(".")[0]
     score_file_name = score_file_path.split(".")[0]
-    train_feature_df.to_csv(f"{feature_file_name}_train.csv")
-    test_feature_df.to_csv(f"{feature_file_name}_test.csv")
-    train_score_df.to_csv(f"{score_file_name}_train.csv")
-    test_score_df.to_csv(f"{score_file_name}_test.csv")
+    train_feature_df.to_csv(f"{feature_file_name}_train.csv", index=False)
+    test_feature_df.to_csv(f"{feature_file_name}_test.csv", index=False)
+    train_score_df.to_csv(f"{score_file_name}_train.csv", index=False)
+    test_score_df.to_csv(f"{score_file_name}_test.csv", index=False)
 
     print(f"Number of training examples: {len(train_feature_df)}")
     print(f"Number of test examples: {len(test_feature_df)}")
