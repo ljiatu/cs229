@@ -65,7 +65,7 @@ def main() -> None:
 
     pool = multiprocessing.Pool(processes=6)
     train_args = [
-        (train_feature_df.deepcopy(), train_score_df.deepcopy(), k, c)
+        (train_feature_df.copy(), train_score_df.copy(), k, c)
         for k in KERNEL_TYPES for c in REGULARIZATION_STRENGTHS
     ]
     rets = pool.starmap(train, train_args)
