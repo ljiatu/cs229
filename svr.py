@@ -8,8 +8,8 @@ from sklearn.svm import SVR
 
 from utils import load_data
 
-KERNEL_TYPES = ["poly", "sigmoid"]
-REGULARIZATION_STRENGTHS = [0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
+KERNEL_TYPES = ["rbf"]
+REGULARIZATION_STRENGTHS = range(65, 128)
 MODEL_SAVE_PATH_FORMAT = "svr_model_k_{}_c_{}.joblib"
 BEST_MODEL_SAVE_PATH = "svr_model_best.joblib"
 
