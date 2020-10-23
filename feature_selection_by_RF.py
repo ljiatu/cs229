@@ -128,6 +128,78 @@ class Feature_Select(object):
             f.write(f"Test MSE:{self.MSE}\nTest R2:{self.r2}\nmost important features:{[self.all_feat_mat.columns[i] for i in ind]}")
 
 
+def train_ordered_test(X_order_train_file, y_train_file, X_order_test_file, y_test_file, range_estimator, n_feature):
+    """
+    pick top features from the training set to train and test on the test set.
+
+    :params X_order_train(test)_file: the training set file with columns ordered by importance.
+    :params y_train(test)_file: the true label file.
+    """
+    X_train = pd.read_csv(X_order_train_file)
+    y_train = pd.read_csv(y_train_file)
+    X_test = pd.read_csv(X_order_test_file)
+    y_test = pd.read_csv(y_test_file)
+    
+    X_train=X_train.iloc[:,:n_feature]
+    X_test=X_test.iloc[:,:n_feature]
+    
+    X_train=np.array(X_train)
+    X_test=np.array(X_test)
+    y_train=np.array(y_train).reshape(-1)
+    y_test=np.array(y_test).reshape(-1)
+    
+    print(f"use top {n_feature} features")
+
+    n_splits = 5
+    random_state = np.random.RandomState(1289237)
+    kfold = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)  #不管是几维的输入，第一维都代表样本数
+    is_train = np.zeros((n_splits, len(X_train)), dtype=np.bool)
+    is_val = np.zeros((n_splits, len(X_train)), dtype=np.bool)
+    print(f"shape X{X_train.shape}")
+    for i, (train_index, test_index) in enumerate(kfold.split(X_train,y_train)):
+        is_train[i, train_index] = 1
+        is_val[i, test_index]=1
+    
+    max_r2=0
+    for n_estimator in range_estimator:
+        print(f"n_estimator:{n_estimator}")
+        train_r2=[]
+        train_mse=[]
+        eval_r2=[]
+        eval_mse=[]
+                        
+        for fold in range(n_splits):
+            regr = RandomForestRegressor(n_estimators=n_estimator)
+            regr.fit(X_train[is_train[fold]], y_train[is_train[fold]])
+
+            y_val_pred = regr.predict(X_train[is_val[fold]])
+            y_train_pred = regr.predict(X_train[is_train[fold]])
+
+            eval_r2.append(r2_score(y_val_pred,y_train[is_val[fold]]))
+            eval_mse.append(mean_squared_error(y_val_pred,y_train[is_val[fold]]))
+
+            train_r2.append(r2_score(y_train_pred,y_train[is_train[fold]]))
+            train_mse.append(mean_squared_error(y_train_pred,y_train[is_train[fold]]))
+
+        print(f"Valid MSE:{eval_mse}, mean test MSE:{np.mean(eval_mse)}")
+        print(f"Valid R2:{eval_r2}, mean test R2:{np.mean(eval_r2)}") 
+        print(f"Train MSE:{train_mse}, mean train MSE:{np.mean(train_mse)}")
+        print(f"Train R2:{train_r2}, mean train R2:{np.mean(train_r2)}") 
+                        
+        if np.mean(eval_r2) > max_r2:
+            max_r2 = np.mean(eval_r2) 
+            which_max = n_estimator
+    print(f"best number of estimators is {which_max}")
+    regr = RandomForestRegressor(n_estimators=which_max)
+    regr.fit(X_train, y_train)
+    y_test_pred = regr.predict(X_test)
+                        
+    print(f"Test MSE:{mean_squared_error(y_test_pred,y_test)}")
+    print(f"TEst R2:{r2_score(y_test_pred,y_test)}")             
+                    
+
+
+
 # 2nd experiment for feature selection by subtracting features.1
 
 feat_sele = Feature_Select()
