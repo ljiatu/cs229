@@ -9,7 +9,7 @@ from sklearn.svm import SVR
 from utils import load_data
 
 KERNEL_TYPES = ["rbf"]
-REGULARIZATION_STRENGTHS = [16]
+REGULARIZATION_STRENGTHS = [16, 32, 64, 128, 256, 512]
 MODEL_SAVE_PATH_FORMAT = "svr_model_mmp_k_{}_c_{}.joblib"
 BEST_MODEL_SAVE_PATH = "svr_model_mmp_best.joblib"
 
