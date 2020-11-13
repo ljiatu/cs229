@@ -9,9 +9,9 @@ from sklearn.svm import SVR
 from utils import load_data
 
 KERNEL_TYPES = ["rbf"]
-REGULARIZATION_STRENGTHS = range(65, 128)
-MODEL_SAVE_PATH_FORMAT = "svr_model_k_{}_c_{}.joblib"
-BEST_MODEL_SAVE_PATH = "svr_model_best.joblib"
+REGULARIZATION_STRENGTHS = [16]
+MODEL_SAVE_PATH_FORMAT = "svr_model_mmp_k_{}_c_{}.joblib"
+BEST_MODEL_SAVE_PATH = "svr_model_mmp_best.joblib"
 
 
 def train(
@@ -60,8 +60,8 @@ def test(test_feature_df: pd.DataFrame, test_score_df: pd.DataFrame, clf: SVR, t
 
 
 def main() -> None:
-    train_feature_df, train_score_df = load_data("X_ordered_by_importance_train.csv", "y_train.csv")
-    test_feature_df, test_score_df = load_data("X_ordered_by_importance_test.csv", "y_test.csv")
+    train_feature_df, train_score_df = load_data("data3_MMPs_X_train.csv", "data3_MMP14_y_train.csv")
+    test_feature_df, test_score_df = load_data("data3_MMPs_X_test.csv", "data3_MMP14_y_test.csv")
 
     pool = multiprocessing.Pool(processes=6)
     train_args = [
@@ -79,7 +79,7 @@ def main() -> None:
 
     dump(best_clf, BEST_MODEL_SAVE_PATH)
     # clf = load("svr_model_best.joblib")
-    test(test_feature_df, test_score_df, best_clf, "svr_preds.csv")
+    test(test_feature_df, test_score_df, best_clf, "svr_MMP14_preds.csv")
 
 
 if __name__ == "__main__":

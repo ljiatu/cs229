@@ -1,3 +1,5 @@
+from glob import glob
+
 from sklearn.model_selection import train_test_split
 
 from utils import load_data
@@ -28,4 +30,6 @@ def split(feature_file_path: str, score_file_path: str) -> None:
 
 
 if __name__ == "__main__":
-    split("X_ordered_by_importance.csv", "y.csv")
+    # split("X_ordered_by_importance.csv", "y.csv")
+    for score_file_name in glob("data3_MMP[0-9]*_y.csv"):
+        split("data3_MMPs_X.csv", score_file_name)
