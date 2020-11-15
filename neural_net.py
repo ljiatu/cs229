@@ -13,7 +13,6 @@ N_iter = 1000
 # Dropout probability.
 DROP_PROB = 0.5
 INIT_LEARNING_RATE = 1e-4
-MODEL_SAVE_PATH_FORMAT = "nn_furin_N_{}_H_{}.pt"
 
 
 def train(
@@ -23,6 +22,7 @@ def train(
         loss_fn: nn.Module,
         optimizer: optim,
         hidden_size: int,
+        mmp_type: int,
         writer: SummaryWriter,
 ):
     # [:, 1:] discards the target sequence names.
@@ -56,7 +56,7 @@ def train(
             if loss_valid < min_valid_loss:
                 min_valid_loss = loss_valid
                 # Save the current best model to a file.
-                torch.save(model, MODEL_SAVE_PATH_FORMAT.format(N, hidden_size))
+                torch.save(model, f"nn_MMP{mmp_type}_N_{N}_H_{hidden_size}.pt")
 
             if t % 100 == 0:
                 print(
@@ -91,9 +91,11 @@ def test(
         preds_with_labels.to_csv(test_output_save_path, index=False)
 
 
-def main():
-    train_feature_df, train_score_df = load_data("X_ordered_by_importance_train.csv", "y_train.csv")
-    test_feature_df, test_score_df = load_data("X_ordered_by_importance_test.csv", "y_test.csv")
+def main(mmp_type: int):
+    # train_feature_df, train_score_df = load_data("X_ordered_by_importance_train.csv", "y_train.csv")
+    # test_feature_df, test_score_df = load_data("X_ordered_by_importance_test.csv", "y_test.csv")
+    train_feature_df, train_score_df = load_data("data3_MMPs_X_train.csv", f"data3_MMP{mmp_type}_y_train.csv")
+    test_feature_df, test_score_df = load_data("data3_MMPs_X_test.csv", f"data3_MMP{mmp_type}_y_test.csv")
     # Number of input features = # of columns - 1. -1 because the first column is the label column.
     D_in = len(train_feature_df.iloc[0]) - 1
 
@@ -111,18 +113,19 @@ def main():
         optimizer = optim.Adam(model.parameters(), lr=INIT_LEARNING_RATE)
 
         # Setup Tensorboard.
-        writer = SummaryWriter(log_dir=f"runs/nn_furin_N_{N}_H_{hidden_size}/")
+        writer = SummaryWriter(log_dir=f"runs/nn_MMP{mmp_type}_N_{N}_H_{hidden_size}/")
 
         model.train()
-        train(train_feature_df, train_score_df, model, loss_fn, optimizer, hidden_size, writer)
+        train(train_feature_df, train_score_df, model, loss_fn, optimizer, hidden_size, mmp_type, writer)
         writer.flush()
         writer.close()
 
         # Load the best model and then run test.
-        best_model = torch.load(MODEL_SAVE_PATH_FORMAT.format(N, hidden_size))
+        best_model = torch.load(f"nn_MMP{mmp_type}_N_{N}_H_{hidden_size}.pt")
         best_model.eval()
-        test(test_feature_df, test_score_df, f"nn_furin_N_{N}_H_{hidden_size}_preds.csv", best_model, loss_fn)
+        test(test_feature_df, test_score_df, f"nn_MMP{mmp_type}_N_{N}_H_{hidden_size}_preds.csv", best_model, loss_fn)
 
 
 if __name__ == "__main__":
-    main()
+    for mmp_type in [1, 2, 3, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 1920, 24, 25]:
+        main(mmp_type)
