@@ -13,7 +13,7 @@ N_iter = 1000
 # Dropout probability.
 DROP_PROB = 0.5
 INIT_LEARNING_RATE = 1e-4
-MODEL_SAVE_PATH_FORMAT = "nn_model_furin_N_{}_H_{}.pt"
+MODEL_SAVE_PATH_FORMAT = "nn_furin_N_{}_H_{}.pt"
 
 
 def train(
@@ -111,7 +111,7 @@ def main():
         optimizer = optim.Adam(model.parameters(), lr=INIT_LEARNING_RATE)
 
         # Setup Tensorboard.
-        writer = SummaryWriter(log_dir=f"runs/nn_model_furin_N_{N}_H_{hidden_size}/")
+        writer = SummaryWriter(log_dir=f"runs/nn_furin_N_{N}_H_{hidden_size}/")
 
         model.train()
         train(train_feature_df, train_score_df, model, loss_fn, optimizer, hidden_size, writer)
@@ -121,7 +121,7 @@ def main():
         # Load the best model and then run test.
         best_model = torch.load(MODEL_SAVE_PATH_FORMAT.format(N, hidden_size))
         best_model.eval()
-        test(test_feature_df, test_score_df, "nn_furin_preds.csv", best_model, loss_fn)
+        test(test_feature_df, test_score_df, f"nn_furin_N_{N}_H_{hidden_size}_preds.csv", best_model, loss_fn)
 
 
 if __name__ == "__main__":
