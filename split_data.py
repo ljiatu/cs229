@@ -17,6 +17,8 @@ def split(feature_file_path: str, score_file_path: str) -> None:
     train_feature_df, test_feature_df, train_score_df, test_score_df = train_test_split(
         feature_df, score_df, test_size=TEST_SET_RATIO, random_state=0,
     )
+    import pdb
+    pdb.set_trace()
 
     feature_file_name = feature_file_path.split(".")[0]
     score_file_name = score_file_path.split(".")[0]
@@ -30,6 +32,6 @@ def split(feature_file_path: str, score_file_path: str) -> None:
 
 
 if __name__ == "__main__":
-    # split("X_ordered_by_importance.csv", "y.csv")
-    for score_file_name in glob("data3_MMP[0-9]*_y.csv"):
-        split("data3_MMPs_X.csv", score_file_name)
+    split("X_ordered_by_importance.csv", "y.csv")
+    # for score_file_name in glob("data3_MMP[0-9]*_y.csv"):
+    #     split("data3_MMPs_X.csv", score_file_name)
