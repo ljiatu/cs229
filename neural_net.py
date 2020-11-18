@@ -121,7 +121,7 @@ def run(
         optimizer = optim.Adam(model.parameters(), lr=INIT_LEARNING_RATE)
 
         # Setup Tensorboard.
-        writer = SummaryWriter(log_dir=f"runs/nn_{protease_type}_N_{N}_H_{hidden_size}/")
+        writer = SummaryWriter(log_dir=f"runs/r2_nn_{protease_type}_N_{N}_H_{hidden_size}/")
 
         model.train()
         train(train_feature_df, train_score_df, model, loss_fn, optimizer, hidden_size, protease_type, writer)
