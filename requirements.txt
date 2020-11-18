@@ -5,3 +5,4 @@ scipy==1.5.3
 sklearn==0.0
 torch==1.7.0
 tensorboard==2.4.0
+matplotlib==3.3.3
