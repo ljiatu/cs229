@@ -76,19 +76,22 @@ def test(
         test_output_save_path: str,
         model: nn.Module,
         loss_fn: nn.Module,
-):
+) -> float:
     X = torch.Tensor(test_feature_df.iloc[:, 1:].values)
     y = torch.Tensor(test_score_df.iloc[:, 1:].values)
     with torch.no_grad():
         pred_test = model(X)
         loss = loss_fn(pred_test, y)
-        print(f"Test loss: {loss}. R^2 score: {metrics.r2_score(y, pred_test)}")
+        r2_score = metrics.r2_score(y, pred_test)
+        print(f"Test loss: {loss}. R^2 score: {r2_score}")
 
         # Save the predicted scores to a csv file.
         preds_df = pd.DataFrame(pred_test).astype("float")
         column_labels = test_score_df.iloc[:, :1].reset_index(drop=True)
         preds_with_labels = pd.concat([column_labels, preds_df], axis=1)
         preds_with_labels.to_csv(test_output_save_path, index=False)
+
+        return r2_score
 
 
 def main(mmp_type: int):
@@ -99,31 +102,41 @@ def main(mmp_type: int):
     # Number of input features = # of columns - 1. -1 because the first column is the label column.
     D_in = len(train_feature_df.iloc[0]) - 1
 
-    for hidden_size in [800, 1600]:
+    r2_scores = []
+    for hidden_size in [5, 10, 25, 50, 100, 200, 400, 800, 1600]:
         print(f"MMP type: {mmp_type}. Training with hidden layer size {hidden_size}")
         # Simple two-layer neural network.
-        model = nn.Sequential(
-            nn.Linear(D_in, hidden_size),
-            nn.ReLU(),
-            nn.Dropout(DROP_PROB),
-            nn.Linear(hidden_size, D_out),
-        )
+        # model = nn.Sequential(
+        #     nn.Linear(D_in, hidden_size),
+        #     nn.ReLU(),
+        #     nn.Dropout(DROP_PROB),
+        #     nn.Linear(hidden_size, D_out),
+        # )
         # Using MSE loss since R^2 is just an affine transformation of MSE.
         loss_fn = nn.MSELoss(reduction="sum")
-        optimizer = optim.Adam(model.parameters(), lr=INIT_LEARNING_RATE)
-
-        # Setup Tensorboard.
-        writer = SummaryWriter(log_dir=f"runs/nn_MMP{mmp_type}_N_{N}_H_{hidden_size}/")
-
-        model.train()
-        train(train_feature_df, train_score_df, model, loss_fn, optimizer, hidden_size, mmp_type, writer)
-        writer.flush()
-        writer.close()
+        # optimizer = optim.Adam(model.parameters(), lr=INIT_LEARNING_RATE)
+        #
+        # # Setup Tensorboard.
+        # writer = SummaryWriter(log_dir=f"runs/nn_MMP{mmp_type}_N_{N}_H_{hidden_size}/")
+        #
+        # model.train()
+        # train(train_feature_df, train_score_df, model, loss_fn, optimizer, hidden_size, mmp_type, writer)
+        # writer.flush()
+        # writer.close()
 
         # Load the best model and then run test.
         best_model = torch.load(f"nn_MMP{mmp_type}_N_{N}_H_{hidden_size}.pt")
         best_model.eval()
-        test(test_feature_df, test_score_df, f"nn_MMP{mmp_type}_N_{N}_H_{hidden_size}_preds.csv", best_model, loss_fn)
+        test_r2_score = test(
+            test_feature_df,
+            test_score_df,
+            f"nn_MMP{mmp_type}_N_{N}_H_{hidden_size}_preds.csv",
+            best_model,
+            loss_fn,
+        )
+        r2_scores.append(test_r2_score)
+
+    print(f"All R^2 scores: {r2_scores}")
 
 
 if __name__ == "__main__":
