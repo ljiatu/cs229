@@ -88,5 +88,5 @@ def main(mmp_type: int) -> None:
 
 
 if __name__ == "__main__":
-    for mmp_type in [1, 2, 3, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 24, 25]:
+    for mmp_type in [1, 13, 14, 16, 24]:
         main(mmp_type)
