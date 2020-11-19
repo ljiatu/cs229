@@ -117,7 +117,7 @@ def run(
             nn.Linear(hidden_size, D_out),
         )
         # Using MSE loss since R^2 is just an affine transformation of MSE.
-        loss_fn = nn.MSELoss(reduction="sum")
+        loss_fn = nn.MSELoss(reduction="mean")
         optimizer = optim.Adam(model.parameters(), lr=INIT_LEARNING_RATE)
 
         # Setup Tensorboard.

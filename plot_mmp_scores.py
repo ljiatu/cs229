@@ -17,11 +17,11 @@ plt.plot(x_labels, y24, label="MMP24")
 plt.legend()
 
 for i in range(6, 9):
-    plt.text(x_labels[i], y1[i], y1[i], ha="center", va="bottom", fontsize=10)
-    plt.text(x_labels[i], y13[i], y13[i], ha="center", va="bottom", fontsize=10)
-    plt.text(x_labels[i], y14[i], y14[i], ha="center", va="bottom", fontsize=10)
-    plt.text(x_labels[i], y16[i], y16[i], ha="center", va="bottom", fontsize=10)
-    plt.text(x_labels[i], y24[i], y24[i], ha="center", va="bottom", fontsize=10)
+    plt.text(x_labels[i], y1[i], y1[i], ha="center", va="bottom", fontsize=15)
+    plt.text(x_labels[i], y13[i], y13[i], ha="center", va="bottom", fontsize=15)
+    plt.text(x_labels[i], y14[i], y14[i], ha="center", va="bottom", fontsize=15)
+    plt.text(x_labels[i], y16[i], y16[i], ha="center", va="bottom", fontsize=15)
+    plt.text(x_labels[i], y24[i], y24[i], ha="center", va="bottom", fontsize=15)
 
 plt.xlabel("Hidden Layer Size")
 plt.ylabel("R^2 Score")
